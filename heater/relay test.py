@@ -1,11 +1,12 @@
 from time import sleep
 
-from gpiozero import LED
+from gpiozero import *
 
-led = LED(pin=17)
+led = PWMOutputDevice(pin=27)
+led.frequency = 800
 
 while True:
-    led.on()
+    led.value = .5
     print("on")
     sleep(4)
 

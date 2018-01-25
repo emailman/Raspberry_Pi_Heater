@@ -13,6 +13,12 @@ txt_alarm_status = None
 # Global object
 temp = None
 
+# Global devices
+buzzer = PWMOutputDevice(pin=27)
+buzzer.frequency = 800
+
+relay = DigitalOutputDevice(pin=17)
+
 
 class TemperatureSensor(CPUTemperature):
     @property
@@ -55,15 +61,18 @@ def calc():
         if sld_actual.value < sld_setpoint.value - sld_deadband.value:
             txt_heater_status.value = "HEATER ON"
             txt_heater_status.text_color = "red"
+            relay.on()
         else:
             txt_heater_status.value = "HEATER OFF"
             txt_heater_status.text_color = "blue"
+            relay.off()
 
         sld_high_alarm.value = sld_setpoint.value + (2 * sld_deadband.value)
         sld_low_alarm.value = sld_setpoint.value - (2 * sld_deadband.value)
     else:
         txt_heater_status.value = "PROBE FAILURE"
         txt_heater_status.text_color = "magenta"
+        relay.off()
 
     alarm()
 
@@ -72,14 +81,17 @@ def alarm():
     if sld_actual.value < sld_low_alarm.value:
         txt_alarm_status.value = "LOW ALARM"
         txt_alarm_status.text_color = "blue"
+        buzzer.value = .5
 
     elif sld_actual.value > sld_high_alarm.value:
         txt_alarm_status.value = "HIGH ALARM"
         txt_alarm_status.text_color = "red"
+        buzzer.value = .5
 
     else:
         txt_alarm_status.value = " NO ALARM "
         txt_alarm_status.text_color = "black"
+        buzzer.value = 0
 
 
 def main():
