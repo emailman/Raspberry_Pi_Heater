@@ -22,22 +22,26 @@ class TemperatureSensor(CPUTemperature):
     @property
     def temperature(self):
         # Open the sensor's data file
-        with open(self.sensor_file, 'r') as f:
-            # Read the two lines in the file
-            lines = f.readlines()
+        try:
+            with open(self.sensor_file, 'r') as f:
+                # Read the two lines in the file
+                lines = f.readlines()
 
-            # If first line has "YES", return the value
-            # from the second line
-            if lines[0].find("YES") >= 0:
-                return float(lines[1].split("=")[1]) / 1000
-            else:
-                # Indicate a probe failure
-                return -40
+                # If first line has "YES", return the value
+                # from the second line
+                if lines[0].find("YES") >= 0:
+                    return float(lines[1].split("=")[1]) / 1000
+                else:
+                    # Indicate a probe failure if YES not found
+                    return -40
+        except FileNotFoundError:
+            # Indicate an error if the data file is not found
+            return -40
 
 
 def refresh():
     # Convert from Celsius to Fahrenheit
-    sld_actual.value = float(temp.temperature * 9 / 5 + 32)
+    sld_actual.value = temp.temperature * 9 / 5 + 32
 
     calc()
 
@@ -59,7 +63,7 @@ def calc():
         sld_low_alarm.value = sld_setpoint.value - (2 * sld_deadband.value)
     else:
         txt_heater_status.value = "PROBE FAILURE"
-        txt_heater_status.text_color = "orange"
+        txt_heater_status.text_color = "magenta"
 
     alarm()
 
